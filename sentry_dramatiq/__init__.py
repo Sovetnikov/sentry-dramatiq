@@ -1,4 +1,6 @@
 import json
+import os
+import threading
 from typing import Any, Callable, Dict, Optional, Union
 
 from dramatiq.broker import Broker
@@ -85,6 +87,9 @@ class SentryMiddleware(Middleware):
         with hub.configure_scope() as scope:
             scope.transaction = message.actor_name
             scope.set_tag('dramatiq_message_id', message.message_id)
+            scope.set_tag('pid', os.getpid())
+            scope.set_tag('tid', threading.get_ident())
+
             scope.add_event_processor(
                 _make_message_event_processor(message, integration)
             )
